@@ -13,6 +13,10 @@ documentsPerLanguage = dict()
 classes = [0, 1]
 trainPartionDim = 0.8
 
+print(genesis.sents(['english-kjv.txt']))
+
+exit 
+
 for file in genesis.fileids():
     print(file)
     if file == 'english-kjv.txt' or file == 'english-web.txt':

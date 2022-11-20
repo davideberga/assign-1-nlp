@@ -24,11 +24,10 @@ countWordIn = lambda word, bagOfWords: reduce(lambda acc, current: acc + (curren
 def prepare_and_tag_data(corpus, targets):
     docsSet = []
     for file in genesis.fileids():
-        clazz = classes[0] if 'english' in file else classes[1]
+        clazz = classes[0] if 'english' in file or 'lolcat' in file else classes[1]
         for sentence in genesis.sents([file]):
             withoutDuplicates = list(dict.fromkeys(sentence)) # remove duplicates within each doc
             docsSet.append([clazz, withoutDuplicates])
-    print(str(len(docsSet)))
     for t in targets:
             t.send(docsSet)
 
@@ -74,7 +73,7 @@ def learning_pipeline(targets):
         pEnglish = math.log(docsTrainInEnglish/totalTrainDocs);
         pNotEnglish = math.log(docsTrainNotInEnglish/totalTrainDocs);
 
-        # Extract vocabulary for train set (must be the globally accepted as it is)
+        # Extract vocabulary for train set
         vocabulary = set()
         for sentence in x_train:
             for word in sentence:
@@ -116,7 +115,11 @@ def test_pipeline(targets):
                     sumEnglish += freq_english.get(word)
                     sumNotEnglish += freq_not_english.get(word)
             outputLabel = classes[0] if(sumEnglish > sumNotEnglish) else classes[1]
-            confMatrix[goldLabel][outputLabel] += 1
+            confMatrix[outputLabel][goldLabel] += 1
+            if(goldLabel != outputLabel):
+                print(" >>> Should be " + str(goldLabel) + " predicted: " + str(outputLabel))
+                print("     >>> Sum english " + str(sumEnglish) + " sum not english: " + str(sumNotEnglish))
+                print("         " + str(sentence))
         for target in targets:
             target.send(confMatrix)
 
