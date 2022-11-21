@@ -121,10 +121,10 @@ def test_pipeline(targets):
                     sumNotEnglish += freq_not_english.get(word)
             outputLabel = classes[0] if(sumEnglish > sumNotEnglish) else classes[1]
             confMatrix[outputLabel][goldLabel] += 1
-            if(goldLabel != outputLabel):
-                print(" >>> Should be " + str(goldLabel) + " predicted: " + str(outputLabel))
-                print("     >>> Sum english " + str(sumEnglish) + " sum not english: " + str(sumNotEnglish))
-                print("         " + str(sentence))
+            #if(goldLabel != outputLabel):
+            #    print(" >>> Should be " + str(goldLabel) + " predicted: " + str(outputLabel))
+            #    print("     >>> Sum english " + str(sumEnglish) + " sum not english: " + str(sumNotEnglish))
+            #    print("         " + str(sentence))
         for target in targets:
             target.send(confMatrix)
 
