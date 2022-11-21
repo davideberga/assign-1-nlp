@@ -1,5 +1,6 @@
 import random
 from functools import reduce
+import re
 
 from nltk.corpus import genesis
 from sklearn.model_selection import train_test_split
@@ -8,10 +9,12 @@ import math
 from coroutine import *
 
 classes = [0, 1]
-trainPartionDim = 0.8
+trainPartionDim = 0.7
 alpha = 1
 
 ##### Utility lamda functions #####
+
+removePunctuation = lambda sentence: filter(lambda word: re.search("[^\.\"!?\-)\(_;,:0-9]", word), sentence)
 
 nDocsIn = lambda cls, setOfItems: reduce(lambda acc, current: acc + (current[1] == cls), enumerate(setOfItems), 0)
 
@@ -26,8 +29,10 @@ def prepare_and_tag_data(corpus, targets):
     for file in genesis.fileids():
         clazz = classes[0] if 'english' in file or 'lolcat' in file else classes[1]
         for sentence in genesis.sents([file]):
+            sentence[0] = sentence[0].lower()
+            sentence = removePunctuation(sentence)
             withoutDuplicates = list(dict.fromkeys(sentence)) # remove duplicates within each doc
-            docsSet.append([clazz, withoutDuplicates])
+            docsSet.append([clazz, withoutDuplicates]) # to lower case
     for t in targets:
             t.send(docsSet)
 
@@ -143,14 +148,4 @@ def preformance_evaluation():
         print("F1 measure " + str(f1Measure))
 
 
-prepare_and_tag_data(genesis, targets=[
-    randomize_docs_set_pipeline(targets=[
-        attr_label_split_pipeline(targets=[
-            train_test_split_pipeline(targets=[
-                learning_pipeline(targets=[
-                    test_pipeline(targets=[preformance_evaluation()]),
-                ])
-            ])
-        ])
-    ])
-])
+
