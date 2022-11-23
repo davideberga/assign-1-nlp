@@ -43,7 +43,7 @@ F1 measure 0.9988623435722412
 
 ## Usage as a Probabilistic Language Model
 
-A model that is able to compute the probability of a sentence (sequence of words) is a probabilistic language model. When the naive bayes model, discussed before, is learned the ENGLISH class can be seen as a unigram language model. In fact given that one is possible to compute the following probabilities:
+A model that is able to compute the probability of a sentence (sequence of words) is a probabilistic language model. When the naive bayes model, discussed before, has learned the ENGLISH class can be seen as a unigram language model. In fact given that one is possible to compute the following probabilities:
 
 - P( word | ENGLISH)
 - P( sentence | ENGLISH)
