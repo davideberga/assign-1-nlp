@@ -1,9 +1,13 @@
 # A basic Naive Bayes classifier
 
+To run this model you need:
+ - nltk, sklearn packages
+ - the genesis corpus
+
 ## Corpus
 
 I built this classifier using the NLTK package and I chose the **genesis** corpus as the training dataset. It contains 315302 tokens and a vocabulary composed of 25832 types. Its size seems to be appropriate for the task and I used it also because it contains documents written in different languages.
-Here's the list of the different texts involved and how I labeled them:
+Here's the list of the different texts involved and how I labeled the docuemnts inside them:
 
 | Text            | Label       |
 |-----------------|-------------|
