@@ -22,16 +22,29 @@ for sentence in corpus.sents():
 print(">> Number of tokens: " + str(tokens))
 print(">> Vocabulary dimension: " + str(len(vocabulary)))
 
-print(">> Pipeline starting")
+print(">> Pipeline starting (nltk Naive Bayes Classifier)")
 
 prepare_and_tag_data(corpus, targets=[
     randomize_docs_set_pipeline(targets=[
         attr_label_split_pipeline(targets=[
-            train_test_split_pipeline(targets=[
-                learning_pipeline(targets=[
-                    test_pipeline(targets=[preformance_evaluation()]),
+            features_ext_train_test_split_pipeline_nltk(targets=[
+                learning_pipeline_nltk(targets=[
+                    test_pipeline_nltk(targets=[preformance_evaluation()]),
                 ])
             ])
         ])
     ])
 ])
+
+# print(">> Pipeline starting (custom Naive Bayes Classifier)")
+# prepare_and_tag_data(corpus, targets=[
+#     randomize_docs_set_pipeline(targets=[
+#         attr_label_split_pipeline(targets=[
+#             train_test_split_pipeline(targets=[
+#                 learning_pipeline(targets=[
+#                     test_pipeline(targets=[preformance_evaluation()]),
+#                 ])
+#             ])
+#         ])
+#     ])
+# ])

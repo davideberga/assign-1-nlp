@@ -2,6 +2,9 @@ import random
 from functools import reduce
 import re
 
+from nltk import NaiveBayesClassifier
+from nltk import FreqDist
+from sklearn.metrics import confusion_matrix
 from nltk.corpus import genesis
 from sklearn.model_selection import train_test_split
 import math
@@ -9,6 +12,7 @@ import math
 from coroutine import *
 
 classes = [0, 1]
+
 trainPartionDim = 0.7
 alpha = 1
 
@@ -29,10 +33,10 @@ def prepare_and_tag_data(corpus, targets):
     for file in genesis.fileids():
         clazz = classes[0] if 'english' in file or 'lolcat' in file else classes[1]
         for sentence in genesis.sents([file]):
-            sentence[0] = sentence[0].lower()
+            sentence[0] = sentence[0].lower() # to lower case
             sentence = removePunctuation(sentence)
             withoutDuplicates = list(dict.fromkeys(sentence)) # remove duplicates within each doc
-            docsSet.append([clazz, withoutDuplicates]) # to lower case
+            docsSet.append([clazz, withoutDuplicates]) 
     for t in targets:
             t.send(docsSet)
 
@@ -72,7 +76,7 @@ def learning_pipeline(targets):
         docsTrainInEnglish = nDocsIn(classes[0], y_train)
         docsTrainNotInEnglish = totalTrainDocs - docsTrainInEnglish
         print("Train docs english " + str(docsTrainInEnglish))
-        print("Train docs not wnglish " + str(docsTrainNotInEnglish))
+        print("Train docs not english " + str(docsTrainNotInEnglish))
 
         # Calc relative frequencies for every class [P(c_j)]
         pEnglish = math.log(docsTrainInEnglish/totalTrainDocs);
@@ -105,6 +109,54 @@ def learning_pipeline(targets):
 
         for target in targets:
             target.send([x_test, y_test, vocabulary, pEnglish, pNotEnglish, freq_english, freq_not_english])
+
+@coroutine
+def features_ext_train_test_split_pipeline_nltk(targets):
+    while True:
+        [X, Y] = (yield)
+        all_words = []
+        for d in X:
+            for w in d:
+                all_words.append(w)
+        all_words = FreqDist(all_words)
+        # Take in consideration only the most frequent words
+        word_features = list(all_words.keys())[:1800]
+        
+        def _format_features(d, label):
+            words = set(d)
+            features = {}
+            for w in words:
+                features[w] = (w in word_features)
+            return (features, label)
+
+        labeled_featureset = [_format_features(doc[1], Y[doc[0]]) for doc in enumerate(X)]
+        boundary = int(trainPartionDim * len(labeled_featureset))
+
+        for target in targets:
+            target.send([labeled_featureset[:boundary], labeled_featureset[boundary:]])
+
+@coroutine
+def learning_pipeline_nltk(targets):
+     while True:
+        [training_set, test_set] = (yield)
+        
+        model = NaiveBayesClassifier.train(training_set)
+
+        for target in targets:
+            target.send([model, test_set])
+
+@coroutine
+def test_pipeline_nltk(targets):
+     while True:
+        [model, test_set] = (yield)
+        confMatrix = [[0, 0], [0, 0]]
+        # Compute manually the confusion matrix
+        for test in test_set:
+            (feat, label) =  test
+            y_predicted = model.classify(feat)
+            confMatrix[y_predicted][label] += 1
+        for target in targets:
+            target.send(confMatrix)
 
 @coroutine
 def test_pipeline(targets):
@@ -146,6 +198,7 @@ def preformance_evaluation():
         print("Recall " + str(recall))
         print("Accuracy " + str(accuracy))
         print("F1 measure " + str(f1Measure))
+
 
 
 
